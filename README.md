@@ -16,9 +16,9 @@
   <br>
 </div>
 
-Memknow 是一个基于 Feishu（飞书）的长期记忆 AI Agent 平台。每个业务场景对应一个飞书应用和一个独立的 Claude Code workspace。用户在飞书发送消息，框架将其路由到对应 workspace 执行 `claude` CLI，通过交互式卡片返回结果。
+Memknow 是一个基于 Feishu（飞书）的长期记忆 AI Agent 平台。每个业务场景对应一个飞书应用和一个独立的 Claude Code workspace。用户在飞书发送消息，框架自动路由至对应的 workspace，Claude 处理后将结果卡片回复至飞书。跨 session 的对话历史和总结自动存储到 SQLite，下次用户输入时自动检索并注入 prompt，实现真正的长期记忆。
 
-> ⚠️ **前提条件**：本项目需要一台**已安装并登录 Claude Code** 的机器。框架是 Claude Code 的调度器与飞书桥接层，不能替代 Claude Code 本身。个人微信: bmagician，欢迎添加讨论。
+> ⚠️ **前提条件**：本项目需要一台**已安装并登录 Claude Code** 的机器。框架是 Claude Code 的调度器与飞书桥接层，不能替代 Claude Code 本身。
 
 ---
 
@@ -80,7 +80,7 @@ make daemon-status
 
 ### Agent 能力
 
-- **Claude Code 全能力**：Read / Edit / Write / Bash / WebFetch 等工具直接可用；workspace 还内置了本地 `bin/web-search` 搜索入口，优先走 Tavily，未配置时自动降级 DuckDuckGo。
+- **Claude Code 全能力**：Read / Edit / Write / Bash / WebFetch 等工具直接可用；workspace 还内置了本地 `bin/web-search` 搜索入口，优先走 Tavily，未配置时自动降级到 DuckDuckGo。
 - **附件支持**：图片、文件自动下载至 session 目录；纯附件消息智能缓存，等待用户说明意图后合并处理。
 - **定时任务**：对话式创建 schedule，内置 `gocron` 调度器直接执行，无需手写 YAML。
 - **内置心跳**：heartbeat 由框架内置调度器管理，按 `config.yaml` 周期触发，自动读取 `HEARTBEAT.md` 执行自省任务。
@@ -130,7 +130,7 @@ flowchart TB
 
 ### channel_key 格式
 
-| 飞书渠道 | channel_key 格式 | 支持 /new |
+| 飞书渠道 | channel_key 格式 | 支��� /new |
 |---------|-----------------|-----------|
 | 单聊（P2P） | `p2p:{chat_id}:{app_id}` | ✅ |
 | 群聊 | `group:{chat_id}:{app_id}` | ✅ |
