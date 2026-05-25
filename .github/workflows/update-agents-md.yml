@@ -3,13 +3,8 @@
 name: Update AGENTS.md
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "internal/**"
-      - "cmd/**"
-      - "go.mod"
-      - "Makefile"
+  schedule:
+    - cron: "0 0 * * 1"  # 每周一凌晨 UTC
   workflow_dispatch: {}
 
 permissions:
