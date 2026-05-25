@@ -19,11 +19,13 @@ const (
 	feishuDoneReaction = "DONE"
 )
 
-var feishuCardHeadingPrefix = regexp.MustCompile(`(?m)^#{1,6}\s+(.+)$`)
-var postContentInvalidRe = regexp.MustCompile(`(?i)content format of the post type is incorrect`)
-var markdownHintRe = regexp.MustCompile(`(?m)(^#{1,6}\s)|(^\s*[-*]\s)|(^\s*\d+\.\s)|(` + "```" + `)|(` + "`[^`\n]+`" + `)|(\*\*[^*\n].+?\*\*)|(\[[^\]]+\]\([^)]+\))|(^>\s)|(^\s*\|.+\|\s*$)`)
-var zeroWidthRuneRe = regexp.MustCompile(`[\x{200B}\x{200C}\x{200D}\x{FEFF}]`)
-var extraBlankLinesRe = regexp.MustCompile(`\n{3,}`)
+var (
+	feishuCardHeadingPrefix = regexp.MustCompile(`(?m)^#{1,6}\s+(.+)$`)
+	postContentInvalidRe    = regexp.MustCompile(`(?i)content format of the post type is incorrect`)
+	markdownHintRe          = regexp.MustCompile(`(?m)(^#{1,6}\s)|(^\s*[-*]\s)|(^\s*\d+\.\s)|(` + "```" + `)|(` + "`[^`\n]+`" + `)|(\*\*[^*\n].+?\*\*)|(\[[^\]]+\]\([^)]+\))|(^>\s)|(^\s*\|.+\|\s*$)`)
+	zeroWidthRuneRe         = regexp.MustCompile(`[\x{200B}\x{200C}\x{200D}\x{FEFF}]`)
+	extraBlankLinesRe       = regexp.MustCompile(`\n{3,}`)
+)
 
 // Sender sends messages and updates interactive cards via Feishu API.
 type Sender struct {

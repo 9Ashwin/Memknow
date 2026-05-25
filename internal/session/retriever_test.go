@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/ashwinyue/Memknow/internal/db"
 	"github.com/ashwinyue/Memknow/internal/model"
-	"github.com/google/uuid"
 )
 
 func TestRetriever_Retrieve(t *testing.T) {

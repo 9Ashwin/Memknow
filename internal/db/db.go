@@ -3,10 +3,11 @@ package db
 import (
 	"fmt"
 
-	"github.com/ashwinyue/Memknow/internal/model"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/ashwinyue/Memknow/internal/model"
 )
 
 // Open opens (or creates) the SQLite database at path and runs AutoMigrate.

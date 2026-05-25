@@ -17,4 +17,3 @@ func SessionDir(workspaceDir, sessionType, sessionID string) string {
 func SessionAttachmentsDir(workspaceDir, sessionType, sessionID string) string {
 	return filepath.Join(SessionDir(workspaceDir, sessionType, sessionID), "attachments")
 }
-

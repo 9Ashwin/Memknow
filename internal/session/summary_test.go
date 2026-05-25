@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/ashwinyue/Memknow/internal/claude"
 	"github.com/ashwinyue/Memknow/internal/config"
 	"github.com/ashwinyue/Memknow/internal/db"
 	"github.com/ashwinyue/Memknow/internal/model"
-	"github.com/google/uuid"
 )
 
 type fakeSummaryExecutor struct {
@@ -92,4 +93,3 @@ func TestAppIDFromChannelKey(t *testing.T) {
 		}
 	}
 }
-

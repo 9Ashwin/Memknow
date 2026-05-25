@@ -70,13 +70,13 @@ func NewService(cfg *config.Config, db *gorm.DB, executor claude.ExecutorInterfa
 	}
 	inner.Start()
 	return &Service{
-		cfg:       cfg,
-		db:        db,
-		executor:  executor,
-		senders:   senders,
-		apps:      apps,
-		scheduler: inner,
-		jobs:      make(map[string]gocron.Job),
+		cfg:        cfg,
+		db:         db,
+		executor:   executor,
+		senders:    senders,
+		apps:       apps,
+		scheduler:  inner,
+		jobs:       make(map[string]gocron.Job),
 		systemJobs: make(map[string]gocron.Job),
 	}, nil
 }
@@ -362,7 +362,7 @@ func summarizeCommand(command string) string {
 }
 
 // ListByApp returns enabled schedules for an app.
-func (s *Service) ListByApp(ctx context.Context, appID string) ([]model.Schedule, error) {
+func (s *Service) ListByApp(_ context.Context, appID string) ([]model.Schedule, error) {
 	var items []model.Schedule
 	if err := s.db.Where("app_id = ? AND enabled = ?", appID, true).Order("created_at desc").Find(&items).Error; err != nil {
 		return nil, err
@@ -371,7 +371,7 @@ func (s *Service) ListByApp(ctx context.Context, appID string) ([]model.Schedule
 }
 
 // ListByCreator returns enabled schedules created by a specific user.
-func (s *Service) ListByCreator(ctx context.Context, appID, createdBy string) ([]model.Schedule, error) {
+func (s *Service) ListByCreator(_ context.Context, appID, createdBy string) ([]model.Schedule, error) {
 	var items []model.Schedule
 	if err := s.db.Where("app_id = ? AND created_by = ? AND enabled = ?", appID, createdBy, true).Order("created_at desc").Find(&items).Error; err != nil {
 		return nil, err
@@ -380,7 +380,7 @@ func (s *Service) ListByCreator(ctx context.Context, appID, createdBy string) ([
 }
 
 // Delete removes a schedule and its registered job.
-func (s *Service) Delete(ctx context.Context, scheduleID string) error {
+func (s *Service) Delete(_ context.Context, scheduleID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if job, ok := s.jobs[scheduleID]; ok {
@@ -436,7 +436,7 @@ func (s *Service) ManageFromMessage(ctx context.Context, appCfg *config.AppConfi
 		var sb strings.Builder
 		sb.WriteString("📋 你的定时提醒：\n")
 		for i, it := range items {
-			sb.WriteString(fmt.Sprintf("%d. %s (`%s`)\n", i+1, it.Name, it.CronExpr))
+			fmt.Fprintf(&sb, "%d. %s (`%s`)\n", i+1, it.Name, it.CronExpr)
 		}
 		return sb.String(), true, nil
 	case "delete":
@@ -525,7 +525,7 @@ func resolveScheduleForManagement(items []model.Schedule, keyword, action string
 	}
 	sb.WriteString("哪一条：\n")
 	for i, it := range items {
-		sb.WriteString(fmt.Sprintf("%d. %s (`%s`)\n", i+1, it.Name, it.CronExpr))
+		fmt.Fprintf(&sb, "%d. %s (`%s`)\n", i+1, it.Name, it.CronExpr)
 	}
 	return nil, sb.String()
 }

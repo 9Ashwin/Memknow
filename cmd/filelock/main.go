@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,10 +12,14 @@ import (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	if len(os.Args) < 4 {
-		fmt.Fprintf(os.Stderr, "Usage: filelock <lock-file> <timeout-seconds> <command> [args...]\n")
-		fmt.Fprintf(os.Stderr, "Example: filelock /path/to/.lock 10 cat file.txt\n")
-		os.Exit(1)
+		fmt.Fprintln(os.Stderr, "Usage: filelock <lock-file> <timeout-seconds> <command> [args...]")
+		fmt.Fprintln(os.Stderr, "Example: filelock /path/to/.lock 10 cat file.txt")
+		return 1
 	}
 
 	lockPath := os.Args[1]
@@ -30,7 +35,7 @@ func main() {
 		var seconds int
 		if _, err := fmt.Sscanf(timeoutSec, "%d", &seconds); err != nil {
 			fmt.Fprintf(os.Stderr, "Invalid timeout: %s\n", timeoutSec)
-			os.Exit(1)
+			return 1
 		}
 		timeout = time.Duration(seconds) * time.Second
 	}
@@ -45,25 +50,27 @@ func main() {
 	locked, err := lock.TryLockContext(ctx, 100*time.Millisecond)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to acquire lock: %v\n", err)
-		os.Exit(1)
+		return 1
 	}
 	if !locked {
-		fmt.Fprintf(os.Stderr, "Timeout waiting for lock\n")
-		os.Exit(1)
+		fmt.Fprintln(os.Stderr, "Timeout waiting for lock")
+		return 1
 	}
 	defer func() { _ = lock.Unlock() }()
 
-	// Execute command
-	cmd := exec.Command(cmdName, cmdArgs...)
+	// Execute command (inherits process context, not the lock-acquire ctx).
+	cmd := exec.CommandContext(context.Background(), cmdName, cmdArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			os.Exit(exitErr.ExitCode())
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			return exitErr.ExitCode()
 		}
 		fmt.Fprintf(os.Stderr, "Failed to execute command: %v\n", err)
-		os.Exit(1)
+		return 1
 	}
+	return 0
 }

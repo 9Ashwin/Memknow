@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ashwinyue/Memknow/internal/model"
 	"gorm.io/gorm"
+
+	"github.com/ashwinyue/Memknow/internal/model"
 )
 
 // Retriever fetches historical context (summaries + FTS5 matches) for a channel.
@@ -107,7 +108,7 @@ LIMIT ?`
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	for rows.Next() {
 		var m SearchMatch
 		if err := db.ScanRows(rows, &m); err != nil {
@@ -232,11 +233,4 @@ func normalizeSnippet(s string) string {
 	replacer := strings.NewReplacer(">>>", "", "<<<", "", "...", " ")
 	s = replacer.Replace(s)
 	return strings.Join(strings.Fields(s), " ")
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

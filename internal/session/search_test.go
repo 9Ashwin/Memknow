@@ -25,4 +25,3 @@ func TestSanitizeFTS5Query_CJKWithNonCJK(t *testing.T) {
 		t.Fatalf("sanitizeFTS5Query mixed mismatch: got %q, want %q", got, want)
 	}
 }
-

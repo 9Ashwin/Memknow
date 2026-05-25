@@ -71,7 +71,7 @@ func groupMatchesBySession(matches []SearchMatch, maxSessions, maxItemsPerSessio
 func formatSearchResults(query string, matches []SearchMatch) string {
 	groups := groupMatchesBySession(matches, 4, 3)
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("🔍 搜索 **%s** 的结果（会话 %d / 命中 %d）:\n\n", query, len(groups), len(matches)))
+	fmt.Fprintf(&sb, "🔍 搜索 **%s** 的结果（会话 %d / 命中 %d）:\n\n", query, len(groups), len(matches))
 
 	if len(groups) == 0 {
 		sb.WriteString("未找到可展示的历史片段")
@@ -79,13 +79,13 @@ func formatSearchResults(query string, matches []SearchMatch) string {
 	}
 
 	for i, g := range groups {
-		sb.WriteString(fmt.Sprintf("%d. %s\n", i+1, sessionDisplayName(g.SessionID, g.SessionTitle)))
+		fmt.Fprintf(&sb, "%d. %s\n", i+1, sessionDisplayName(g.SessionID, g.SessionTitle))
 		for _, m := range g.Items {
 			role := m.Role
 			if role == "" {
 				role = "消息"
 			}
-			sb.WriteString(fmt.Sprintf("  - [%s] `%s` %s\n", role, m.CreatedAt.Format("01-02 15:04"), matchExcerpt(m, 120)))
+			fmt.Fprintf(&sb, "  - [%s] `%s` %s\n", role, m.CreatedAt.Format("01-02 15:04"), matchExcerpt(m, 120))
 		}
 		sb.WriteString("\n")
 	}

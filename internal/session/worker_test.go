@@ -356,16 +356,17 @@ type testSender struct {
 	texts []string
 }
 
-func (s *testSender) SendThinking(context.Context, string, string) (string, error) { return "", nil }
-func (s *testSender) UpdateCard(context.Context, string, string) error             { return nil }
+func (*testSender) SendThinking(context.Context, string, string) (string, error) { return "", nil }
+func (*testSender) UpdateCard(context.Context, string, string) error             { return nil }
 func (s *testSender) SendText(_ context.Context, _, _ string, text string) (string, error) {
 	s.texts = append(s.texts, text)
 	return "msg", nil
 }
-func (s *testSender) AddProcessingReaction(context.Context, string) (string, error) {
+
+func (*testSender) AddProcessingReaction(context.Context, string) (string, error) {
 	return "reaction-1", nil
 }
-func (s *testSender) AddDoneReaction(context.Context, string) error { return nil }
+func (*testSender) AddDoneReaction(context.Context, string) error { return nil }
 
 type streamSender struct {
 	thinkingIDs []string
@@ -391,10 +392,12 @@ func (s *streamSender) SendText(_ context.Context, _, _ string, text string) (st
 	s.texts = append(s.texts, text)
 	return "msg", nil
 }
-func (s *streamSender) AddProcessingReaction(context.Context, string) (string, error) {
+
+func (*streamSender) AddProcessingReaction(context.Context, string) (string, error) {
 	return "reaction-1", nil
 }
-func (s *streamSender) AddDoneReaction(context.Context, string) error {
+
+func (*streamSender) AddDoneReaction(context.Context, string) error {
 	return nil
 }
 
@@ -650,9 +653,9 @@ func TestWorker_Process_GroupProbeIgnore_SkipsMainReply(t *testing.T) {
 			ID:           "app1",
 			WorkspaceDir: t.TempDir(),
 		},
-		db:       database,
-		executor: executor,
-		sender:   sender,
+		db:         database,
+		executor:   executor,
+		sender:     sender,
 		sessionCfg: config.SessionConfig{Probe: config.SessionProbeConfig{Enabled: true}},
 	}
 
@@ -697,9 +700,9 @@ func TestWorker_Process_GroupProbeRespond_ActivatesMainReply(t *testing.T) {
 			ID:           "app1",
 			WorkspaceDir: t.TempDir(),
 		},
-		db:       database,
-		executor: executor,
-		sender:   sender,
+		db:         database,
+		executor:   executor,
+		sender:     sender,
 		sessionCfg: config.SessionConfig{Probe: config.SessionProbeConfig{Enabled: true}},
 	}
 
@@ -750,9 +753,9 @@ func TestWorker_Process_GroupMention_SkipsProbe(t *testing.T) {
 			ID:           "app1",
 			WorkspaceDir: t.TempDir(),
 		},
-		db:       database,
-		executor: executor,
-		sender:   sender,
+		db:         database,
+		executor:   executor,
+		sender:     sender,
 		sessionCfg: config.SessionConfig{Probe: config.SessionProbeConfig{Enabled: true}},
 	}
 

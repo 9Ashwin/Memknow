@@ -3,6 +3,7 @@ package websearch
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -21,10 +22,10 @@ func RunCLI(args []string) error {
 	}
 	query := strings.TrimSpace(strings.Join(fs.Args(), " "))
 	if query == "" {
-		return fmt.Errorf("query is required")
+		return errors.New("query is required")
 	}
 	if strings.TrimSpace(*configPath) == "" {
-		return fmt.Errorf("--config is required")
+		return errors.New("--config is required")
 	}
 
 	data, err := os.ReadFile(*configPath)

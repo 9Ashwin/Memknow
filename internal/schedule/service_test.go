@@ -92,7 +92,7 @@ func TestService_CreateAndRun(t *testing.T) {
 		Name:        "每小时喝水提醒",
 		Description: "提醒喝水",
 		CronExpr:    "0 * * * *",
-		TargetType: "p2p",
+		TargetType:  "p2p",
 		TargetID:    "ou_user",
 		Command:     "提醒我喝水",
 		CreatedBy:   "ou_user",
@@ -227,17 +227,17 @@ func TestService_ManageFromMessage_DeleteSingleScheduleViaLLM(t *testing.T) {
 	database := openTestDB(t)
 	now := time.Now()
 	if err := database.Create(&model.Schedule{
-		ID:        "sched-1",
-		AppID:     "app1",
-		Name:      "喝水提醒",
-		CronExpr:  "* * * * *",
-		TargetType:"p2p",
-		TargetID:  "ou_user",
-		Command:   "提醒我喝水",
-		Enabled:   true,
-		CreatedBy: "ou_user",
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:         "sched-1",
+		AppID:      "app1",
+		Name:       "喝水提醒",
+		CronExpr:   "* * * * *",
+		TargetType: "p2p",
+		TargetID:   "ou_user",
+		Command:    "提醒我喝水",
+		Enabled:    true,
+		CreatedBy:  "ou_user",
+		CreatedAt:  now,
+		UpdatedAt:  now,
 	}).Error; err != nil {
 		t.Fatalf("create schedule: %v", err)
 	}
@@ -281,17 +281,17 @@ func TestService_ManageFromMessage_DeleteWithoutKeywordDisambiguates(t *testing.
 	now := time.Now()
 	for i, name := range []string{"喝水提醒", "开会提醒"} {
 		if err := database.Create(&model.Schedule{
-			ID:        fmt.Sprintf("sched-%d", i+1),
-			AppID:     "app1",
-			Name:      name,
-			CronExpr:  "* * * * *",
-			TargetType:"p2p",
-			TargetID:  "ou_user",
-			Command:   name,
-			Enabled:   true,
-			CreatedBy: "ou_user",
-			CreatedAt: now,
-			UpdatedAt: now,
+			ID:         fmt.Sprintf("sched-%d", i+1),
+			AppID:      "app1",
+			Name:       name,
+			CronExpr:   "* * * * *",
+			TargetType: "p2p",
+			TargetID:   "ou_user",
+			Command:    name,
+			Enabled:    true,
+			CreatedBy:  "ou_user",
+			CreatedAt:  now,
+			UpdatedAt:  now,
 		}).Error; err != nil {
 			t.Fatalf("create schedule %s: %v", name, err)
 		}
@@ -327,16 +327,16 @@ func TestService_BootstrapRegistersEnabledSchedules(t *testing.T) {
 	database := openTestDB(t)
 	now := time.Now()
 	if err := database.Create(&model.Schedule{
-		ID:        "sched-1",
-		AppID:     "app1",
-		Name:      "test",
-		CronExpr:  "0 * * * *",
-		TargetType:"p2p",
-		TargetID:  "ou_user",
-		Command:   "提醒我喝水",
-		Enabled:   true,
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:         "sched-1",
+		AppID:      "app1",
+		Name:       "test",
+		CronExpr:   "0 * * * *",
+		TargetType: "p2p",
+		TargetID:   "ou_user",
+		Command:    "提醒我喝水",
+		Enabled:    true,
+		CreatedAt:  now,
+		UpdatedAt:  now,
 	}).Error; err != nil {
 		t.Fatalf("create schedule: %v", err)
 	}

@@ -61,15 +61,15 @@ func NewManager(
 		registry[a.ID] = a
 	}
 	return &Manager{
-		cfg:             cfg,
-		appRegistry:     registry,
-		db:              db,
-		executor:        executor,
-		senders:         senderRegistry,
-		scheduleMgr:     scheduleMgr,
-		summarizer:      NewSummarizer(db, cfg, executor),
-		retriever:       NewRetriever(db),
-		recentMsgIDs:    make(map[string]time.Time),
+		cfg:          cfg,
+		appRegistry:  registry,
+		db:           db,
+		executor:     executor,
+		senders:      senderRegistry,
+		scheduleMgr:  scheduleMgr,
+		summarizer:   NewSummarizer(db, cfg, executor),
+		retriever:    NewRetriever(db),
+		recentMsgIDs: make(map[string]time.Time),
 	}
 }
 

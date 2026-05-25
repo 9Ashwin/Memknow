@@ -28,7 +28,7 @@ func (p ContextPayload) ToPrompt() string {
 	sb.WriteString("## 相关历史记录\n\n")
 
 	for _, s := range p.Summaries {
-		sb.WriteString(fmt.Sprintf("- [会话摘要] %s: %s\n", s.CreatedAt.Format("2006-01-02"), s.Content))
+		fmt.Fprintf(&sb, "- [会话摘要] %s: %s\n", s.CreatedAt.Format("2006-01-02"), s.Content)
 	}
 
 	groups := groupMatchesBySession(p.Matches, 5, 3)
@@ -38,13 +38,13 @@ func (p ContextPayload) ToPrompt() string {
 		}
 		sb.WriteString("### 历史片段\n")
 		for _, g := range groups {
-			sb.WriteString(fmt.Sprintf("- %s\n", sessionDisplayName(g.SessionID, g.SessionTitle)))
+			fmt.Fprintf(&sb, "- %s\n", sessionDisplayName(g.SessionID, g.SessionTitle))
 			for _, m := range g.Items {
 				prefix := m.Role
 				if prefix == "" {
 					prefix = "消息"
 				}
-				sb.WriteString(fmt.Sprintf("  - [%s] %s: %s\n", prefix, m.CreatedAt.Format("2006-01-02"), matchExcerpt(m, 200)))
+				fmt.Fprintf(&sb, "  - [%s] %s: %s\n", prefix, m.CreatedAt.Format("2006-01-02"), matchExcerpt(m, 200))
 			}
 		}
 	}

@@ -29,4 +29,3 @@ func TestSessionDir_ByType(t *testing.T) {
 		})
 	}
 }
-

@@ -174,7 +174,7 @@ func buildFlatSkillIndex(workspaceDir string) string {
 	sb.WriteString("需要时通过 `Read` 工具读取完整内容（例如 `Read`：`skills/<name>.md`）。\n\n")
 	for _, n := range names {
 		base := strings.TrimSuffix(n, filepath.Ext(n))
-		sb.WriteString(fmt.Sprintf("- **%s** (`skills/%s`)\n", base, n))
+		fmt.Fprintf(&sb, "- **%s** (`skills/%s`)\n", base, n)
 	}
 	return sb.String()
 }

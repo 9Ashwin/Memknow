@@ -5,12 +5,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -77,7 +79,7 @@ func (e *InteractiveExecutor) Stop() {
 func (e *InteractiveExecutor) Execute(ctx context.Context, req *ExecuteRequest) (*ExecuteResult, error) {
 	sess := e.getOrCreateSession(req)
 	if sess == nil {
-		return nil, fmt.Errorf("interactive session unavailable")
+		return nil, errors.New("interactive session unavailable")
 	}
 
 	if err := sess.sendUserMessage(req.Prompt); err != nil {
@@ -181,7 +183,7 @@ func newInteractiveSession(cfg *config.Config, req *ExecuteRequest) *interactive
 		"--permission-prompt-tool", "stdio",
 		"--verbose",
 		"--permission-mode", permissionMode(req.AppConfig),
-		"--max-turns", fmt.Sprintf("%d", cfg.Claude.MaxTurns),
+		"--max-turns", strconv.Itoa(cfg.Claude.MaxTurns),
 	}
 
 	if req.ClaudeSessionID != "" {
@@ -226,13 +228,14 @@ func newInteractiveSession(cfg *config.Config, req *ExecuteRequest) *interactive
 	setProcAttrs(cmd)
 
 	env := filterEnv(filterEnv(os.Environ(), "CLAUDECODE"), "CLAUDE_CODE_")
-	cmd.Env = append(env,
+	env = append(env,
 		"TERM=xterm-256color",
 		"FORCE_COLOR=0",
 		"WORKSPACE_DIR="+workspaceDir,
 		"MEMKNOW_SESSION_DIR="+sessionDir,
 		"MEMKNOW_SESSION_CONTEXT="+filepath.Join(sessionDir, "SESSION_CONTEXT.md"),
 	)
+	cmd.Env = env
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -308,7 +311,7 @@ func (is *interactiveSession) collectResult(ctx context.Context, onProgress func
 		select {
 		case evt, ok := <-is.events:
 			if !ok {
-				return result, fmt.Errorf("session closed unexpectedly")
+				return result, errors.New("session closed unexpectedly")
 			}
 
 			switch evt.Kind {

@@ -3,6 +3,7 @@ package feishu
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -49,14 +50,14 @@ type IncomingMessage struct {
 
 // Receiver connects to Feishu WebSocket and dispatches messages.
 type Receiver struct {
-	appCfg     *config.AppConfig
-	client     *lark.Client
-	dispatcher Dispatcher
-	sender     *Sender
-	wsClient   *larkws.Client
-	botOpenID  string
-	botIDOnce  sync.Once
-	botIDs     []string
+	appCfg              *config.AppConfig
+	client              *lark.Client
+	dispatcher          Dispatcher
+	sender              *Sender
+	wsClient            *larkws.Client
+	botOpenID           string
+	botIDOnce           sync.Once
+	botIDs              []string
 	parentMessageLookup func(ctx context.Context, parentID string) (*larkim.Message, error)
 }
 
@@ -101,19 +102,19 @@ func (r *Receiver) Start(ctx context.Context) error {
 }
 
 // handleMessageRead ignores read-receipt events to avoid noisy "not found handler" logs.
-func (r *Receiver) handleMessageRead(ctx context.Context, event *larkim.P2MessageReadV1) error {
+func (*Receiver) handleMessageRead(_ context.Context, _ *larkim.P2MessageReadV1) error {
 	return nil
 }
 
 // handleMessageReactionCreated ignores reaction-created events to avoid noisy
 // "not found handler" logs from Feishu websocket dispatcher.
-func (r *Receiver) handleMessageReactionCreated(ctx context.Context, event *larkim.P2MessageReactionCreatedV1) error {
+func (*Receiver) handleMessageReactionCreated(_ context.Context, _ *larkim.P2MessageReactionCreatedV1) error {
 	return nil
 }
 
 // handleMessageReactionDeleted ignores reaction-deleted events to avoid noisy
 // "not found handler" logs from Feishu websocket dispatcher.
-func (r *Receiver) handleMessageReactionDeleted(ctx context.Context, event *larkim.P2MessageReactionDeletedV1) error {
+func (*Receiver) handleMessageReactionDeleted(_ context.Context, _ *larkim.P2MessageReactionDeletedV1) error {
 	return nil
 }
 
@@ -305,7 +306,7 @@ func (r *Receiver) resolveBotOpenID(ctx context.Context) string {
 			return
 		}
 		if body.Code != 0 {
-			slog.Warn("feishu: bot info returned error", "app_id", r.appCfg.ID, "code", body.Code, "msg", body.Msg)
+			slog.Warn("feishu: bot info returned error", "app_id", r.appCfg.ID, "code", body.Code, "message", body.Msg)
 			return
 		}
 		r.botOpenID = strings.TrimSpace(body.Bot.OpenID)
@@ -362,7 +363,7 @@ func (r *Receiver) lookupParentMessage(ctx context.Context, parentID string) (*l
 		return r.parentMessageLookup(ctx, parentID)
 	}
 	if r == nil || r.client == nil {
-		return nil, fmt.Errorf("feishu: client not configured")
+		return nil, errors.New("feishu: client not configured")
 	}
 	req := larkim.NewGetMessageReqBuilder().
 		MessageId(parentID).
@@ -372,7 +373,7 @@ func (r *Receiver) lookupParentMessage(ctx context.Context, parentID string) (*l
 		return nil, err
 	}
 	if resp == nil || !resp.Success() || resp.Data == nil || len(resp.Data.Items) == 0 {
-		return nil, fmt.Errorf("feishu: parent message not found")
+		return nil, errors.New("feishu: parent message not found")
 	}
 	return resp.Data.Items[0], nil
 }
@@ -443,7 +444,7 @@ func mentionDisplayName(mention *larkim.MentionEvent) string {
 func (r *Receiver) parseContent(
 	ctx context.Context,
 	msg *larkim.EventMessage,
-	msgType, messageID, senderOpenID, chatID string,
+	msgType, messageID, _, _ string,
 ) (string, error) {
 	content := safeStr(msg.Content)
 
@@ -554,13 +555,13 @@ const maxAttachmentBytes = 100 << 20
 // saveBody writes an io.Reader to a local file, capping at maxAttachmentBytes.
 func saveBody(body io.Reader, path string) error {
 	if body == nil {
-		return fmt.Errorf("empty response body")
+		return errors.New("empty response body")
 	}
 	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	// H-3: limit copy size to prevent runaway disk exhaustion.
 	_, err = io.Copy(f, io.LimitReader(body, maxAttachmentBytes))
 	return err
@@ -577,7 +578,7 @@ func DownloadURL(ctx context.Context, url, destPath string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	return saveBody(resp.Body, destPath)
 }
 
@@ -669,7 +670,7 @@ func (r *Receiver) parsePostContent(ctx context.Context, content, messageID stri
 						slog.Warn("feishu: download post image failed, skipping", "err", err)
 						sb.WriteString("[图片下载失败]")
 					} else {
-						sb.WriteString(fmt.Sprintf("[图片: %s]", localPath))
+						fmt.Fprintf(&sb, "[图片: %s]", localPath)
 					}
 				}
 			case "file":
@@ -679,9 +680,9 @@ func (r *Receiver) parsePostContent(ctx context.Context, content, messageID stri
 					localPath, err := r.downloadFile(ctx, messageID, fileKey, fileName)
 					if err != nil {
 						slog.Warn("feishu: download post file failed, skipping", "err", err, "file_name", fileName)
-						sb.WriteString(fmt.Sprintf("[文件 %s 下载失败]", fileName))
+						fmt.Fprintf(&sb, "[文件 %s 下载失败]", fileName)
 					} else {
-						sb.WriteString(fmt.Sprintf("[文件: %s]", localPath))
+						fmt.Fprintf(&sb, "[文件: %s]", localPath)
 					}
 				}
 			}

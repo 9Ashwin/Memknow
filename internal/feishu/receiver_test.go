@@ -194,10 +194,10 @@ func TestHandleMessageRead_NoOp(t *testing.T) {
 func TestHandleMessage_GroupWithoutMention_DispatchedForProbe(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg: &config.AppConfig{ID: "app-a"},
+		appCfg:     &config.AppConfig{ID: "app-a"},
 		dispatcher: dispatcher,
-		botOpenID: "ou_bot",
-		botIDs: []string{"app-a", "cloud", "oii"},
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"app-a", "cloud", "oii"},
 	}
 
 	event := newTextMessageEvent("group", "oc_group", "", "om_1", "ou_user", "hello", nil)
@@ -218,10 +218,10 @@ func TestHandleMessage_GroupWithoutMention_DispatchedForProbe(t *testing.T) {
 func TestHandleMessage_GroupMentioningDifferentBot_Dropped(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg: &config.AppConfig{ID: "app-a"},
+		appCfg:     &config.AppConfig{ID: "app-a"},
 		dispatcher: dispatcher,
-		botOpenID: "ou_bot",
-		botIDs: []string{"app-a", "cloud", "oii"},
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"app-a", "cloud", "oii"},
 	}
 
 	mentions := []*larkim.MentionEvent{
@@ -243,10 +243,10 @@ func TestHandleMessage_GroupMentioningDifferentBot_Dropped(t *testing.T) {
 func TestHandleMessage_GroupNamingCurrentBot_Dispatched(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg:      &config.AppConfig{ID: "cloud"},
-		dispatcher:  dispatcher,
-		botOpenID:   "ou_bot",
-		botIDs:      []string{"cloud", "oii"},
+		appCfg:     &config.AppConfig{ID: "cloud"},
+		dispatcher: dispatcher,
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"cloud", "oii"},
 	}
 
 	event := newTextMessageEvent("group", "oc_group", "", "om_name_me", "ou_user", "cloud 你怎么看", nil)
@@ -264,10 +264,10 @@ func TestHandleMessage_GroupNamingCurrentBot_Dispatched(t *testing.T) {
 func TestHandleMessage_GroupNamingOtherBot_Dropped(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg:      &config.AppConfig{ID: "cloud"},
-		dispatcher:  dispatcher,
-		botOpenID:   "ou_bot",
-		botIDs:      []string{"cloud", "oii"},
+		appCfg:     &config.AppConfig{ID: "cloud"},
+		dispatcher: dispatcher,
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"cloud", "oii"},
 	}
 
 	event := newTextMessageEvent("group", "oc_group", "", "om_name_other", "ou_user", "oii 你呢", nil)
@@ -282,10 +282,10 @@ func TestHandleMessage_GroupNamingOtherBot_Dropped(t *testing.T) {
 func TestHandleMessage_GroupNamingCurrentBot_WithPunctuation_Dispatched(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg:      &config.AppConfig{ID: "cloud"},
-		dispatcher:  dispatcher,
-		botOpenID:   "ou_bot",
-		botIDs:      []string{"cloud", "oii"},
+		appCfg:     &config.AppConfig{ID: "cloud"},
+		dispatcher: dispatcher,
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"cloud", "oii"},
 	}
 
 	event := newTextMessageEvent("group", "oc_group", "", "om_name_punct", "ou_user", "cloud，你呢？", nil)
@@ -303,10 +303,10 @@ func TestHandleMessage_GroupNamingCurrentBot_WithPunctuation_Dispatched(t *testi
 func TestHandleMessage_GroupMentioningCurrentBot_Dispatched(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg: &config.AppConfig{ID: "app-a"},
+		appCfg:     &config.AppConfig{ID: "app-a"},
 		dispatcher: dispatcher,
-		botOpenID: "ou_bot",
-		botIDs: []string{"app-a", "cloud", "oii"},
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"app-a", "cloud", "oii"},
 	}
 
 	mentions := []*larkim.MentionEvent{
@@ -337,10 +337,10 @@ func TestHandleMessage_GroupMentioningCurrentBot_Dispatched(t *testing.T) {
 func TestHandleMessage_P2PWithoutMention_Dispatched(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg: &config.AppConfig{ID: "app-a"},
+		appCfg:     &config.AppConfig{ID: "app-a"},
 		dispatcher: dispatcher,
-		botOpenID: "ou_bot",
-		botIDs: []string{"app-a", "cloud", "oii"},
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"app-a", "cloud", "oii"},
 	}
 
 	event := newTextMessageEvent("p2p", "oc_p2p", "", "om_4", "ou_user", "hello", nil)
@@ -361,10 +361,10 @@ func TestHandleMessage_P2PWithoutMention_Dispatched(t *testing.T) {
 func TestHandleMessage_GroupReplyingToBot_Dispatched(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg: &config.AppConfig{ID: "app-a", FeishuAppID: "cli_bot_app"},
+		appCfg:     &config.AppConfig{ID: "app-a", FeishuAppID: "cli_bot_app"},
 		dispatcher: dispatcher,
-		botOpenID: "ou_bot",
-		botIDs: []string{"app-a", "cloud", "oii"},
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"app-a", "cloud", "oii"},
 		parentMessageLookup: func(context.Context, string) (*larkim.Message, error) {
 			return larkim.NewMessageBuilder().
 				MessageId("om_parent").
@@ -390,10 +390,10 @@ func TestHandleMessage_GroupReplyingToBot_Dispatched(t *testing.T) {
 func TestHandleMessage_GroupReplyingToNonBot_Dropped(t *testing.T) {
 	dispatcher := &recordingDispatcher{}
 	r := &Receiver{
-		appCfg: &config.AppConfig{ID: "app-a", FeishuAppID: "cli_bot_app"},
+		appCfg:     &config.AppConfig{ID: "app-a", FeishuAppID: "cli_bot_app"},
 		dispatcher: dispatcher,
-		botOpenID: "ou_bot",
-		botIDs: []string{"app-a", "cloud", "oii"},
+		botOpenID:  "ou_bot",
+		botIDs:     []string{"app-a", "cloud", "oii"},
 		parentMessageLookup: func(context.Context, string) (*larkim.Message, error) {
 			return larkim.NewMessageBuilder().
 				MessageId("om_parent").

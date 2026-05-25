@@ -61,4 +61,3 @@ func TestFormatSearchResults(t *testing.T) {
 		}
 	}
 }
-

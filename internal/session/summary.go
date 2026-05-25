@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/ashwinyue/Memknow/internal/claude"
 	"github.com/ashwinyue/Memknow/internal/config"
 	"github.com/ashwinyue/Memknow/internal/model"
-	"gorm.io/gorm"
 )
 
 // Summarizer generates session summaries using a Claude executor.

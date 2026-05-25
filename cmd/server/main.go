@@ -28,12 +28,16 @@ import (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	if len(os.Args) > 1 && os.Args[1] == "web-search" {
 		if err := websearch.RunCLI(os.Args[2:]); err != nil {
 			slog.Error("web-search", "err", err)
-			os.Exit(1)
+			return 1
 		}
-		return
+		return 0
 	}
 
 	configPath := flag.String("config", "config.yaml", "path to config.yaml")
@@ -48,27 +52,27 @@ func main() {
 	lockFile, err := acquireSingletonLock("memknow.lock")
 	if err != nil {
 		slog.Error("singleton lock failed", "err", err)
-		os.Exit(1)
+		return 1
 	}
-	defer lockFile.Close()
+	defer func() { _ = lockFile.Close() }()
 
 	// ── Config ───────────────────────────────────────────────────
 	cfg, err := config.Load(*configPath, true)
 	if err != nil {
 		slog.Error("load config", "err", err)
-		os.Exit(1)
+		return 1
 	}
 	// H-4: validate all required fields at startup.
 	if err := cfg.Validate(); err != nil {
 		slog.Error("invalid config", "err", err)
-		os.Exit(1)
+		return 1
 	}
 
 	// ── Database ──────────────────────────────────────────────────
 	database, err := db.Open("bot.db")
 	if err != nil {
 		slog.Error("open database", "err", err)
-		os.Exit(1)
+		return 1
 	}
 	if absDB, err := filepath.Abs("bot.db"); err == nil {
 		cfg.DBPath = absDB
@@ -80,7 +84,7 @@ func main() {
 	for _, appCfg := range cfg.Apps {
 		if err := workspace.Init(appCfg.WorkspaceDir, "", appCfg.FeishuAppID, appCfg.FeishuAppSecret, cfg.WebSearch, cfg.Language, appCfg.NormalizedWorkspaceTemplate()); err != nil {
 			slog.Error("init workspace", "app", appCfg.ID, "err", err)
-			os.Exit(1)
+			return 1
 		}
 		slog.Info("workspace ready", "app", appCfg.ID, "dir", appCfg.WorkspaceDir, "lang", cfg.Language, "template", appCfg.NormalizedWorkspaceTemplate())
 	}
@@ -135,11 +139,11 @@ func main() {
 	scheduleSvc, err := schedulepkg.NewService(cfg, database, executor, scheduleSenders)
 	if err != nil {
 		slog.Error("create schedule service", "err", err)
-		os.Exit(1)
+		return 1
 	}
 	if err := scheduleSvc.Bootstrap(ctx); err != nil {
 		slog.Error("bootstrap schedules", "err", err)
-		os.Exit(1)
+		return 1
 	}
 	sessionMgr := session.NewManager(cfg, database, executor, senders, scheduleSvc)
 	// Store BEFORE launching any goroutine (Go memory model guarantees visibility
@@ -148,7 +152,7 @@ func main() {
 
 	if _, err := cleanup.NewService(database, cfg.Apps, cfg.Cleanup, scheduleSvc); err != nil {
 		slog.Error("register cleanup job", "err", err)
-		os.Exit(1)
+		return 1
 	}
 
 	heartbeatSenders := make(map[string]heartbeat.Sender, len(senders))
@@ -163,9 +167,9 @@ func main() {
 
 	// ── HTTP health check ─────────────────────────────────────────
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "ok")
+		_, _ = fmt.Fprintln(w, "ok")
 	})
 	// H-7: set read/write timeouts to prevent resource exhaustion.
 	httpServer := &http.Server{
@@ -216,6 +220,7 @@ func main() {
 	}
 
 	slog.Info("bye")
+	return 0
 }
 
 // dispatchForwarder holds a pointer to session.Manager via atomic.Pointer.

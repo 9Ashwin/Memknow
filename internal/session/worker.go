@@ -546,7 +546,7 @@ func (w *Worker) finishAndSendResult(
 			}
 		}
 		w.replyError(ctx, msg, cardMsgID,
-			fmt.Errorf("AI 返回为空，可能是会话上下文过长。请发送 /new 开启新会话后重试"))
+			errors.New("AI 返回为空，可能是会话上下文过长。请发送 /new 开启新会话后重试"))
 		return
 	}
 
@@ -855,7 +855,7 @@ func (w *Worker) maybeAsyncSummarize(sessionID string) {
 
 // handleNewSilent archives the current session, cleans up the interactive
 // process, and creates a new active session. It returns the newly created session.
-func (w *Worker) handleNewSilent(ctx context.Context, senderID string) (*model.Session, error) {
+func (w *Worker) handleNewSilent(_ context.Context, senderID string) (*model.Session, error) {
 	var oldSess model.Session
 	w.db.Where("channel_key = ? AND status = ?", w.channelKey, statusActive).
 		Order("created_at DESC").

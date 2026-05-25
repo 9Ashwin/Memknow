@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -172,11 +173,11 @@ type WebSearchConfig struct {
 // Call this immediately after Load to catch misconfiguration at startup.
 func (c *Config) Validate() error {
 	if len(c.Apps) == 0 {
-		return fmt.Errorf("config: at least one app must be defined")
+		return errors.New("config: at least one app must be defined")
 	}
 	for _, app := range c.Apps {
 		if app.ID == "" {
-			return fmt.Errorf("config: app is missing 'id'")
+			return errors.New("config: app is missing 'id'")
 		}
 		if app.FeishuAppID == "" {
 			return fmt.Errorf("config: app %q is missing 'feishu_app_id'", app.ID)
@@ -288,10 +289,10 @@ func (c *Config) SetAppWorkspaceMode(appID, mode string) error {
 		return fmt.Errorf("invalid workspace mode %q", mode)
 	}
 	if c == nil {
-		return fmt.Errorf("config is nil")
+		return errors.New("config is nil")
 	}
 	if c.ConfigPath == "" {
-		return fmt.Errorf("config path is empty")
+		return errors.New("config path is empty")
 	}
 	if err := updateAppWorkspaceModeInFile(c.ConfigPath, appID, normalized); err != nil {
 		return err
@@ -316,7 +317,7 @@ func updateAppWorkspaceModeInFile(path, appID, mode string) error {
 		return fmt.Errorf("parse config yaml: %w", err)
 	}
 	if len(root.Content) == 0 {
-		return fmt.Errorf("config yaml is empty")
+		return errors.New("config yaml is empty")
 	}
 
 	appNode, err := findAppNodeByID(root.Content[0], appID)
@@ -337,11 +338,11 @@ func updateAppWorkspaceModeInFile(path, appID, mode string) error {
 
 func findAppNodeByID(root *yaml.Node, appID string) (*yaml.Node, error) {
 	if root == nil || root.Kind != yaml.MappingNode {
-		return nil, fmt.Errorf("config yaml root must be a mapping")
+		return nil, errors.New("config yaml root must be a mapping")
 	}
 	appsNode := mappingValue(root, "apps")
 	if appsNode == nil || appsNode.Kind != yaml.SequenceNode {
-		return nil, fmt.Errorf("config yaml missing apps sequence")
+		return nil, errors.New("config yaml missing apps sequence")
 	}
 	for _, item := range appsNode.Content {
 		if item.Kind != yaml.MappingNode {

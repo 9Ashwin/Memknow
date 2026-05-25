@@ -215,11 +215,11 @@ func TestCopyTemplate_SkipsSymlinks(t *testing.T) {
 	}
 
 	// Create a real file and a symlink in the template dir.
-	real := filepath.Join(templateDir, "real.md")
-	if err := os.WriteFile(real, []byte("real"), 0o644); err != nil {
+	realFile := filepath.Join(templateDir, "real.md")
+	if err := os.WriteFile(realFile, []byte("real"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Symlink(real, filepath.Join(templateDir, "link.md")); err != nil {
+	if err := os.Symlink(realFile, filepath.Join(templateDir, "link.md")); err != nil {
 		t.Skip("symlinks not supported on this platform")
 	}
 

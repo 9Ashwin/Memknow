@@ -293,7 +293,7 @@ func (s *compactCardStreamer) sendLocked(content string, now time.Time) {
 	cancel()
 	if err != nil {
 		s.failed = true
-		slog.Warn("compact streamer: UpdateCard failed", "messageID", s.messageID, "error", err)
+		slog.Warn("compact streamer: UpdateCard failed", "message_id", s.messageID, "error", err)
 		return
 	}
 	s.lastSent = content

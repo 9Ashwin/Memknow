@@ -3,6 +3,7 @@ package schedule
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -28,15 +29,17 @@ type llmManageIntentResponse struct {
 	NewPrompt string `json:"new_prompt"`
 }
 
-var firstJSONObjectRe = regexp.MustCompile(`(?s)\{.*\}`)
-var cronExprFieldRe = regexp.MustCompile(`^[0-9*/,\-]+$`)
+var (
+	firstJSONObjectRe = regexp.MustCompile(`(?s)\{.*\}`)
+	cronExprFieldRe   = regexp.MustCompile(`^[0-9*/,\-]+$`)
+)
 
 // parseIntentWithLLM asks Claude to convert natural language schedule requests
 // into a strict JSON intent. It returns ok=false when the intent should not be
 // auto-created.
 func (s *Service) parseIntentWithLLM(ctx context.Context, appCfg *config.AppConfig, prompt string) (Intent, bool, error) {
 	if s == nil || s.executor == nil || appCfg == nil {
-		return Intent{}, false, fmt.Errorf("llm parser unavailable")
+		return Intent{}, false, errors.New("llm parser unavailable")
 	}
 
 	parsePrompt := fmt.Sprintf(`你是一个定时任务解析器。请把用户输入解析成 JSON，不要输出任何额外文字。
@@ -74,7 +77,7 @@ func (s *Service) parseIntentWithLLM(ctx context.Context, appCfg *config.AppConf
 
 	raw := extractFirstJSONObject(result.Text)
 	if raw == "" {
-		return Intent{}, false, fmt.Errorf("llm intent parser returned non-json")
+		return Intent{}, false, errors.New("llm intent parser returned non-json")
 	}
 
 	var out llmIntentResponse
@@ -92,7 +95,7 @@ func (s *Service) parseIntentWithLLM(ctx context.Context, appCfg *config.AppConf
 		Command:     strings.TrimSpace(out.Command),
 	}
 	if intent.Command == "" {
-		return Intent{}, false, fmt.Errorf("llm intent missing command")
+		return Intent{}, false, errors.New("llm intent missing command")
 	}
 	if intent.Name == "" {
 		intent.Name = fmt.Sprintf("定时%s提醒", summarizeCommand(intent.Command))
@@ -108,7 +111,7 @@ func (s *Service) parseIntentWithLLM(ctx context.Context, appCfg *config.AppConf
 
 func (s *Service) parseManageIntentWithLLM(ctx context.Context, appCfg *config.AppConfig, prompt string) (ManageIntent, bool, error) {
 	if s == nil || s.executor == nil || appCfg == nil {
-		return ManageIntent{}, false, fmt.Errorf("llm parser unavailable")
+		return ManageIntent{}, false, errors.New("llm parser unavailable")
 	}
 
 	parsePrompt := fmt.Sprintf(`你是一个定时任务管理意图解析器。请把用户输入解析成 JSON，不要输出任何额外文字。
@@ -146,7 +149,7 @@ func (s *Service) parseManageIntentWithLLM(ctx context.Context, appCfg *config.A
 
 	raw := extractFirstJSONObject(result.Text)
 	if raw == "" {
-		return ManageIntent{}, false, fmt.Errorf("llm manage parser returned non-json")
+		return ManageIntent{}, false, errors.New("llm manage parser returned non-json")
 	}
 
 	var out llmManageIntentResponse

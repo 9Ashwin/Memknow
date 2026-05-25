@@ -6,8 +6,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/ashwinyue/Memknow/internal/model"
 	"gorm.io/gorm"
+
+	"github.com/ashwinyue/Memknow/internal/model"
 )
 
 // ContextMsg is a single message in the surrounding context of a search match.
@@ -25,11 +26,6 @@ type SearchMatch struct {
 	RankScore    float64      `gorm:"column:rank_score"`
 	Snippet      string       `gorm:"column:snippet"`
 	Context      []ContextMsg `gorm:"-"`
-}
-
-// searchMessages performs an FTS5 search across messages for a given channel.
-func searchMessages(db *gorm.DB, channelKey, query string, limit int) ([]SearchMatch, error) {
-	return searchMessagesWithStatus(db, channelKey, query, "", "", limit)
 }
 
 // searchMessagesWithStatus performs an FTS5 search with optional session status and type filter.
@@ -72,7 +68,7 @@ LIMIT ?`, strings.Join(conditions, " AND "))
 	if err != nil {
 		return nil, fmt.Errorf("fts5 query: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var match SearchMatch
