@@ -24,7 +24,7 @@ Infrastructure dependencies:
 ## Tech Stack
 
 ### Backend (Go)
-- **Language**: Go 1.24
+- **Language**: Go 1.25
 - **Config**: Viper（YAML 文件 + 文件监听热加载）
 - **ORM**: GORM v1.25 + SQLite (glebarez 驱动，纯 Go 实现)
 - **Feishu SDK**: `github.com/larksuite/oapi-sdk-go/v3`
@@ -209,7 +209,7 @@ Memknow/
 必须同步更新：
 - `internal/heartbeat/service.go`
 - `config.yaml.template` 的 `heartbeat:` 段
-- `internal/workspace/prompts/zh/HEARTBEAT.md` 与 `internal/workspace/prompts/en/HEARTBEAT.md`（如果路径变更）
+- `internal/workspace/template/zh/HEARTBEAT.md` 与 `internal/workspace/template/en/HEARTBEAT.md`（如果路径变更）
 - 所有提及 heartbeat 的文档
 
 ### 修改 web 搜索行为
@@ -295,4 +295,13 @@ make build           # 产出 ./server
 
 ## Database Tables
 
-（此段已删除，待 AI 自动恢复）
+| Table | Purpose | Key Fields |
+|---|---|---|
+| `channels` | 飞书渠道注册（p2p / group / topic_group） | `channel_key` (PK), `app_id`, `chat_type`, `chat_id`, `thread_id` |
+| `sessions` | 会话记录，含 Claude session ID 用于 --resume | `id` (PK), `channel_key`, `type` (chat/heartbeat/schedule), `claude_session_id`, `status`, `title`, `parent_session_id`, 用量统计字段 |
+| `messages` | 单条消息记录（user / assistant / tool） | `id` (PK), `session_id`, `role`, `content`, `feishu_msg_id`, `token_count` |
+| `message_tool_calls` | 结构化工具调用记录 | `id` (PK), `session_id`, `message_id`, `call_id`, `name`, `input`, `output`, `order_index` |
+| `session_summaries` | 已归档会话的自动摘要 | `id` (PK), `session_id`, `channel_key`, `content`, `message_count` |
+| `schedules` | 业务调度任务（自然语言创建） | `id` (PK), `app_id`, `name`, `cron_expr`, `target_type`, `target_id`, `command`, `enabled` |
+| `schedule_logs` | 调度执行记录 | `id` (PK), `schedule_id`, `session_id`, `status`, `result_text`, `error_message`, `started_at`, `completed_at` |
+
