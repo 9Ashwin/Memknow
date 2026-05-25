@@ -24,7 +24,7 @@ Infrastructure dependencies:
 ## Tech Stack
 
 ### Backend (Go)
-- **Language**: Go 1.24
+- **Language**: Go 1.25.3
 - **Config**: Viper（YAML 文件 + 文件监听热加载）
 - **ORM**: GORM v1.25 + SQLite (glebarez 驱动，纯 Go 实现)
 - **Feishu SDK**: `github.com/larksuite/oapi-sdk-go/v3`
@@ -35,8 +35,9 @@ Infrastructure dependencies:
 - **Logging**: 标准库 `log/slog`（snake_case 键、结构化）
 
 ### Tooling
-- **Lint**: `golangci-lint` (`.golangci.yml`) — 15 linter，启用 gofumpt formatter
+- **Lint**: `golangci-lint` (`.golangci.yml`) — 20+ linter，启用 gofumpt/gci/goimports formatter
 - **Hooks**: `.husky/` git pre-commit — 大文件检查 + AGENTS.md 同步检查 + 并行 go lint + go test
+- **CI AGENTS.md 自动同步**: `.github/workflows/update-agents-md.yml` — push 触发 claude-code-action（DeepSeek）自动读代码更新 AGENTS.md 并开 PR
 - **CI Issue 模板**: `.github/ISSUE_TEMPLATE/` — Bug / Feature / RFC
 - **PR 模板**: `.github/pull_request_template.md`
 - **Daemon**: macOS launchd / Linux systemd 脚本（`daemon-mac.sh` / `daemon-linux.sh`）
@@ -93,7 +94,7 @@ Memknow/
 ├── workspaces/                           # 运行时 workspace 实例（gitignored）
 ├── tests/                                # 集成 / 端到端测试
 ├── docs/                                 # 设计文档
-├── .github/                              # Issue/PR 模板
+├── .github/                              # CI workflows + Issue/PR 模板
 ├── .husky/                               # Git pre-commit hooks
 ├── .golangci.yml                         # golangci-lint 配置
 ├── config.yaml                           # 运行配置（gitignored）
