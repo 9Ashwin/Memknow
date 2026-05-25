@@ -24,7 +24,7 @@ Infrastructure dependencies:
 ## Tech Stack
 
 ### Backend (Go)
-- **Language**: Go 1.25.3
+- **Language**: Go 1.24
 - **Config**: Viper（YAML 文件 + 文件监听热加载）
 - **ORM**: GORM v1.25 + SQLite (glebarez 驱动，纯 Go 实现)
 - **Feishu SDK**: `github.com/larksuite/oapi-sdk-go/v3`
@@ -35,7 +35,7 @@ Infrastructure dependencies:
 - **Logging**: 标准库 `log/slog`（snake_case 键、结构化）
 
 ### Tooling
-- **Lint**: `golangci-lint` (`.golangci.yml`) — 20+ linter，启用 gofumpt/gci/goimports formatter
+- **Lint**: `golangci-lint` (`.golangci.yml`) — 15 linter，启用 gofumpt formatter
 - **Hooks**: `.husky/` git pre-commit — 大文件检查 + AGENTS.md 同步检查 + 并行 go lint + go test
 - **CI Issue 模板**: `.github/ISSUE_TEMPLATE/` — Bug / Feature / RFC
 - **PR 模板**: `.github/pull_request_template.md`

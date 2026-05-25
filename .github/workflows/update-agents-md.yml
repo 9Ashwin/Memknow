@@ -27,7 +27,7 @@ jobs:
         .
       output_mode: pr
       anthropic_base_url: https://api.deepseek.com/anthropic
-      model: deepseek-v4-flash
+      model: deepseek-v4-pro
       extra_instructions: |
         - This is a Go project (飞书 AI 数字分身平台 Memknow).
         - Focus on Go package structure under internal/ and cmd/.
