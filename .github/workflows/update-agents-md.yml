@@ -1,0 +1,37 @@
+# Keep AGENTS.md in sync with structural code changes.
+# Uses Claude-compatible agent (via DeepSeek) to update AGENTS.md automatically.
+name: Update AGENTS.md
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "internal/**"
+      - "cmd/**"
+      - "go.mod"
+      - "Makefile"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  update:
+    uses: 9Ashwin/agents-md-updater/.github/workflows/update-agents-md.yml@main
+    with:
+      agent: claude
+      target_files: AGENTS.md
+      directories: |
+        .
+      output_mode: pr
+      anthropic_base_url: https://api.deepseek.com/anthropic
+      model: deepseek-v4-flash
+      extra_instructions: |
+        - This is a Go project (飞书 AI 数字分身平台 Memknow).
+        - Focus on Go package structure under internal/ and cmd/.
+        - Keep descriptions in Chinese where the existing AGENTS.md uses Chinese.
+        - Pay attention to new/deleted/renamed files in internal/ subdirectories.
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
