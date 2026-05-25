@@ -24,7 +24,7 @@ Infrastructure dependencies:
 ## Tech Stack
 
 ### Backend (Go)
-- **Language**: Go 1.24
+- **Language**: Go 1.25
 - **Config**: Viper（YAML 文件 + 文件监听热加载）
 - **ORM**: GORM v1.25 + SQLite (glebarez 驱动，纯 Go 实现)
 - **Feishu SDK**: `github.com/larksuite/oapi-sdk-go/v3`
@@ -35,7 +35,7 @@ Infrastructure dependencies:
 - **Logging**: 标准库 `log/slog`（snake_case 键、结构化）
 
 ### Tooling
-- **Lint**: `golangci-lint` (`.golangci.yml`) — 15 linter，启用 gofumpt formatter
+- **Lint**: `golangci-lint` (`.golangci.yml`) — 23 linters，启用 gofumpt formatter
 - **Hooks**: `.husky/` git pre-commit — 大文件检查 + AGENTS.md 同步检查 + 并行 go lint + go test
 - **CI Issue 模板**: `.github/ISSUE_TEMPLATE/` — Bug / Feature / RFC
 - **PR 模板**: `.github/pull_request_template.md`
@@ -52,15 +52,19 @@ Memknow/
 │   ├── config/                           # Viper YAML 配置 + 热加载回调
 │   │   └── config.go                     #   Config / AppConfig / 校验 / 文件 watch
 │   ├── model/                            # GORM 数据模型
-│   │   └── models.go                     #   Session / Message / SessionSummary / Schedule
+│   │   ├── models.go                     #   Channel / Session / Message / MessageToolCall / SessionSummary / Schedule / ScheduleLog
+│   │   └── session_types.go              #   会话类型常量（chat / heartbeat / schedule）
 │   ├── db/                               # SQLite 连接封装（WAL、外键、FTS5 索引初始化）
 │   │   └── db.go
 │   ├── claude/                           # Claude CLI 子进程编排
 │   │   ├── executor.go                   #   ExecutorInterface + 默认实现 + 系统提示词渲染
 │   │   ├── interactive.go                #   长驻交互式会话：stream-json 双工 IO
 │   │   ├── prompts.go                    #   不同会话类型（chat/heartbeat/schedule）的基础提示词
-│   │   ├── prompts/base.md               #   嵌入式 prompt 模板
-│   │   └── *_test.go                     #   系统提示词、技能注入、E2E、SessionContext 测试
+│   │   ├── prompts/
+│   │   │   ├── base.md / chat.md / heartbeat.md / schedule.md   #   en 嵌入式 prompt 模板
+│   │   │   └── zh/                        #   zh 中文 prompt 模板（base_zh.md / chat_zh.md / heartbeat_zh.md / schedule_zh.md）
+│   │   ├── executor_unix.go / executor_windows.go  #   平台相关 executor 实现
+│   │   ├── executor_e2e_test.go / executor_skills_test.go / executor_test.go / prompts_test.go
 │   ├── feishu/                           # 飞书 WS 接收 + 卡片/消息发送
 │   │   ├── receiver.go                   #   WS 客户端 + 事件路由（消息/反应/群成员变更）
 │   │   ├── sender.go                     #   卡片 SendThinking / UpdateCard / Reaction / SendText / SendCard
@@ -295,4 +299,14 @@ make build           # 产出 ./server
 
 ## Database Tables
 
-（此段已删除，待 AI 自动恢复）
+SQLite 单文件 `bot.db`，GORM AutoMigrate，WAL 模式 + FTS5 全文索引。
+
+| 表 | 主键 | 说明 |
+|---|---|---|
+| `channels` | `channel_key` | 飞书渠道：chat_type（p2p/group/topic_group）、chat_id、thread_id |
+| `sessions` | `id` | 会话：type（chat/heartbeat/schedule）、status、token 用量、cost、model |
+| `messages` | `id` | 消息：role（user/assistant/tool）、content、tool_call_id、reasoning |
+| `message_tool_calls` | `id` | 工具调用：name、input、output、order_index |
+| `session_summaries` | `id` | 会话摘要：content、message_count、关联 session + channel |
+| `schedules` | `id` | 定时调度：cron_expr、target_type、target_id、command、enabled |
+| `schedule_logs` | `id` | 调度执行日志：status（ok/error）、result_text、error_message |
