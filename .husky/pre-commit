@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+sh "$SCRIPT_DIR/check-large-files" || exit 1
+sh "$SCRIPT_DIR/check-agents-md" || exit 1
+
+echo ""
+echo "Running checks..."
+
+sh "$SCRIPT_DIR/check-go" &
+PID_GO=$!
+
+sh "$SCRIPT_DIR/check-go-test" &
+PID_GO_TEST=$!
+
+FAIL=0
+
+wait "$PID_GO" || FAIL=1
+wait "$PID_GO_TEST" || FAIL=1
+
+[ "$FAIL" -eq 0 ] || exit 1

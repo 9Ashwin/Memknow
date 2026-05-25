@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+# Check if AGENTS.md should be updated when structural files change.
+# Structural changes = new/deleted/renamed files in key directories.
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACDR)
+[ -z "$STAGED" ] && exit 0
+
+# Patterns that likely need AGENTS.md updates
+HIT=$(echo "$STAGED" | grep -E \
+  '^(internal/[^/]*/|cmd/server/|internal/workspace/template/)' \
+  || true)
+
+[ -z "$HIT" ] && exit 0
+
+# Structural files changed — check if AGENTS.md is also staged
+if ! echo "$STAGED" | grep -q '^AGENTS\.md$'; then
+  echo ""
+  echo "⚠️  Structural files changed but AGENTS.md was not updated:"
+  echo "$HIT" | head -10 | sed 's/^/    /'
+  echo ""
+  echo "  Please review and update AGENTS.md if needed, then stage it."
+  echo "  To skip: git commit --no-verify"
+  echo ""
+  exit 1
+fi

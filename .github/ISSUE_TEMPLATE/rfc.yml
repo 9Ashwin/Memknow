@@ -1,0 +1,78 @@
+name: 📋 RFC
+description: Propose a significant design change or new architecture decision
+title: "[RFC]: "
+labels: ["rfc", "needs-discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        RFCs are for proposing significant changes that need design discussion before implementation.
+        For smaller improvements, please use the Feature Request template instead.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One-paragraph summary of the proposal
+      placeholder: "What are you proposing in a nutshell?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this change needed? What problem does it solve?
+      placeholder: "Why should we do this?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: design
+    attributes:
+      label: Design
+      description: Detailed design including interfaces, data models, configuration, and integration points
+      placeholder: |
+        ## Architecture
+        ...
+        ## Interfaces
+        ...
+        ## Data Model
+        ...
+        ## Configuration
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches were considered and why were they rejected?
+      placeholder: "Describe alternative approaches..."
+
+  - type: textarea
+    id: rollout
+    attributes:
+      label: Implementation Plan
+      description: Phased rollout plan with priorities
+      placeholder: |
+        - P0: ...
+        - P1: ...
+        - P2: ...
+
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-Goals
+      description: What is explicitly out of scope for this RFC?
+      placeholder: "What are we NOT doing?"
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Confirmation
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and RFCs for overlap
+          required: true

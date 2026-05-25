@@ -1,4 +1,4 @@
-.PHONY: fs setup-lark-bot build run daemon ds dr dsp daemon-install daemon-uninstall daemon-start daemon-stop daemon-restart daemon-status
+.PHONY: fs setup-lark-bot build run test lint vet tidy setup daemon ds dr dsp daemon-install daemon-uninstall daemon-start daemon-stop daemon-restart daemon-status
 
 SETUP_LARK_BOT_SCRIPT ?= ./setup_lark_bot.sh
 UNAME_S := $(shell uname -s)
@@ -62,6 +62,22 @@ build:
 
 run:
 	go run ./cmd/server -config "$(CONFIG)"
+
+test:
+	go test ./... -v -race
+
+lint:
+	golangci-lint run ./...
+
+vet:
+	go vet ./...
+
+tidy:
+	go mod tidy
+
+setup:
+	git config core.hooksPath .husky
+	@echo "Git hooks installed (.husky)"
 
 daemon: daemon-install
 

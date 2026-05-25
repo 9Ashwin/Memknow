@@ -1,0 +1,106 @@
+version: "2"
+
+run:
+  timeout: 15m
+  go: "1.25"
+  tests: true
+
+output:
+  show-stats: false
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - errcheck
+    - errorlint
+    - exptostd
+    - fatcontext
+    - gocritic
+    - gosec
+    - godot
+    - govet
+    - ineffassign
+    - misspell
+    - noctx
+    - nilnesserr
+    - perfsprint
+    - predeclared
+    - revive
+    - sqlclosecheck
+    - sloglint
+    - staticcheck
+    - unconvert
+    - unused
+    - usestdlibvars
+    - whitespace
+  exclusions:
+    generated: lax
+  settings:
+    govet:
+      enable-all: true
+      disable:
+        - shadow
+        - fieldalignment
+    perfsprint:
+      int-conversion: true
+      err-error: true
+      errorf: true
+      sprintf1: true
+      strconcat: false
+    revive:
+      rules:
+        - name: blank-imports
+        - name: comment-spacings
+        - name: context-as-argument
+          arguments:
+            - allowTypesBefore: "*testing.T,testing.TB"
+        - name: dot-imports
+        - name: error-naming
+        - name: error-return
+        - name: error-strings
+        - name: increment-decrement
+        - name: var-declaration
+        - name: unreachable-code
+        - name: unused-parameter
+        - name: unused-receiver
+    sloglint:
+      attr-only: false
+      no-global: ""
+      static-msg: false
+      key-naming-case: snake
+      forbidden-keys: [time, level, msg, source]
+    gosec:
+      excludes:
+        - G301 # Expect directory permissions to be 0750 or less (workspace needs 0755)
+        - G302 # Expect file permissions to be 0600 or less (lockfile needs 0644)
+        - G304 # Potential file inclusion via variable (workspace file ops are intentional)
+        - G306 # Expect WriteFile permissions to be 0600 or less (workspace needs 0644)
+        - G204 # Subprocess launched with variable (claude CLI is intentional)
+        - G115 # Integer overflow conversion (syscall.Flock uses int(uintptr))
+        - G117 # Exported struct field matches secret pattern (config field naming)
+        - G704 # SSRF via taint analysis (controlled HTTP client)
+        - G705 # XSS via taint analysis (CLI output, not HTML)
+        - G706 # Log injection via taint analysis (slog handles escaping)
+        - G702 # Command injection (filelock CLI wrapper is intentional)
+
+formatters:
+  enable:
+    - gci
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/ashwinyue/Memknow)
+    gofumpt:
+      extra-rules: false
+    goimports:
+      local-prefixes:
+        - github.com/ashwinyue/Memknow

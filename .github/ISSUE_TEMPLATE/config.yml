@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Memknow Documentation
+    url: https://github.com/ashwinyue/Memknow/blob/main/README.md
+    about: Check Memknow README and docs
+  - name: Discussions
+    url: https://github.com/ashwinyue/Memknow/discussions
+    about: Ask questions or share ideas in Discussions
