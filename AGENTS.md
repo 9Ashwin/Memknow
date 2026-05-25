@@ -295,4 +295,16 @@ make build           # 产出 ./server
 
 ## Database Tables
 
-（此段已删除，待 AI 自动恢复）
+- `sessions` — 会话元数据（id、channel_key、type、status、claude_session_id、title、时间戳）
+- `messages` — 消息内容（session_id、role、content、attachments、created_at）
+- `messages_fts` — FTS5 全文索引（自动维护，CJK bigram 净化由 `internal/session/search.go`）
+- `session_summaries` — 会话摘要（异步生成，供长会话压缩）
+- `schedules` — 业务调度（id、app_id、name、cron_expr、command、created_by、enabled）
+
+## Safety / Operational Notes
+
+- 主进程通过 `memknow.lock` 单实例锁防止 launchd/KeepAlive 启动重复实例
+- WS 重连由 lark SDK 自动处理；断流时 session worker 不会丢弃已入队消息
+- Claude CLI 子进程崩溃时由 `alive.Store(false)` 标记，下次请求自动重建并 `--resume` 上次 session
+- 大附件下载有 100 MiB 上限（`maxAttachmentBytes`）
+- HTTP 服务有 5s/10s 读写超时；shutdown 有 10s 超时
