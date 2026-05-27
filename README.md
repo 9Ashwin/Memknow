@@ -130,7 +130,7 @@ flowchart TB
 
 ### channel_key 格式
 
-| 飞书渠道 | channel_key 格式 | 支��� /new |
+| 飞书渠道 | channel_key 格式 | 支持 /new |
 |---------|-----------------|-----------|
 | 单聊（P2P） | `p2p:{chat_id}:{app_id}` | ✅ |
 | 群聊 | `group:{chat_id}:{app_id}` | ✅ |
